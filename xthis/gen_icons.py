@@ -1,31 +1,24 @@
 #!/usr/bin/env python3
-"""Generate XTHIS extension icons. XT monogram in orange on near-black."""
+"""Generate XTHIS extension icons. XT monogram, Cormorant Garamond on dark."""
 from PIL import Image, ImageDraw, ImageFont
 import os
 
-BG = (13, 13, 13, 255)       # #0D0D0D
-FG = (217, 119, 6, 255)      # #D97706
+BG = (26, 27, 31, 255)       # #1A1B1F
+FG = (236, 230, 220, 255)    # #ECE6DC
 SIZES = [16, 32, 48, 128]
 
-# SF Mono — same family Terminal.app uses by default. Bold for icon legibility.
-FONT_CANDIDATES = [
-    "/Library/Fonts/SF-Mono-Bold.otf",
-    "/Applications/Utilities/Terminal.app/Contents/Resources/Fonts/SF-Mono-Bold.otf",
-    "/Library/Fonts/SF-Mono-Semibold.otf",
-    "/Library/Fonts/SF-Mono-Regular.otf",
-    "/System/Library/Fonts/SFNSMono.ttf",
-    "/System/Library/Fonts/Menlo.ttc",
-    "/System/Library/Fonts/Monaco.ttf",
-]
+# Cormorant Garamond, variable font (wght axis). Vendored, SIL OFL.
+HERE = os.path.dirname(__file__)
+FONT_PATH = os.path.join(HERE, "fonts", "CormorantGaramond[wght].ttf")
+FONT_WEIGHT = 700  # Bold
 
 def load_font(size):
-    for path in FONT_CANDIDATES:
-        if os.path.exists(path):
-            try:
-                return ImageFont.truetype(path, size)
-            except Exception:
-                continue
-    return ImageFont.load_default()
+    font = ImageFont.truetype(FONT_PATH, size)
+    try:
+        font.set_variation_by_axes([FONT_WEIGHT])
+    except Exception:
+        pass
+    return font
 
 out_dir = os.path.join(os.path.dirname(__file__), "icons")
 os.makedirs(out_dir, exist_ok=True)
@@ -38,8 +31,9 @@ for size in SIZES:
     # (skipped - terminal look prefers sharp corners)
 
     text = "XT"
-    # Pick a font size that fills the icon nicely
-    font_px = int(size * 0.62)
+    # Cormorant Garamond Bold is wide; size so painted "XT" leaves a small
+    # margin inside the tile (and reads clean at 16px).
+    font_px = int(size * 0.7)
     font = load_font(font_px)
 
     # Center text
